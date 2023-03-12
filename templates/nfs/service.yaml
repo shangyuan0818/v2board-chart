@@ -1,0 +1,26 @@
+{{- if .Values.nfs.enabled -}}
+kind: Service
+apiVersion: v1
+metadata:
+  name: {{ include "v2board.fullname" . }}-nfs-server
+spec:
+  ports:
+    - name: nfs
+      protocol: TCP
+      port: 2049
+      targetPort: 2049
+    - name: mountd
+      protocol: TCP
+      port: 20048
+      targetPort: 20048
+    - name: rpcbind
+      protocol: TCP
+      port: 111
+      targetPort: 111
+  selector:
+    app: {{ include "v2board.fullname" . }}-nfs-server
+  type: ClusterIP
+  sessionAffinity: None
+  internalTrafficPolicy: Cluster
+
+{{- end -}}

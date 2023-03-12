@@ -1,0 +1,17 @@
+{{- if not .Values.nfs.persistence.existingClaim -}}
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: {{ include "v2board.fullname" . }}-nfs-pvc
+  annotations:
+    volume.beta.kubernetes.io/storage-class: {{ .Values.nfs.persistence.storageClass }}
+spec:
+  accessModes:
+    - {{ .Values.nfs.persistence.accessMode }}
+  resources:
+    requests:
+      storage: {{ .Values.nfs.persistence.size }}
+  storageClassName: {{ .Values.nfs.persistence.storageClass }}
+  volumeMode: Filesystem
+
+{{- end -}}

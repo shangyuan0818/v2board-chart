@@ -1,0 +1,21 @@
+{{ if .Values.nfs.enabled }}
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: {{ include "v2board.fullname" . }}-nfs
+spec:
+  capacity:
+    storage: {{ .Values.nfs.persistence.size }}
+  nfs:
+    server: {{ include "v2board.fullname" . }}-nfs-server.{{ .Release.Namespace }}.svc.{{ .Values.clusterDomain }}
+    path: /
+  accessModes:
+    - ReadWriteMany
+  claimRef:
+    kind: PersistentVolumeClaim
+    namespace: {{ .Release.Namespace }}
+    name: {{ include "v2board.fullname" . }}-nfs
+    apiVersion: v1
+  persistentVolumeReclaimPolicy: Delete
+  volumeMode: Filesystem
+{{ end }}

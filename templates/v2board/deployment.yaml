@@ -1,0 +1,175 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "v2board.fullname" . }}-v2board
+  labels:
+    {{- include "v2board.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "v2board.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "v2board.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      volumes:
+        - name: v2board-nginx-conf # nginx配置文件
+          configMap:
+            name: {{ include "v2board.fullname" . }}-nginx-conf
+            defaultMode: 420 # 0644
+        - name: config-data # 配置文件
+          persistentVolumeClaim:
+            claimName: {{ include "v2board.fullname" . }}-nfs
+      containers:
+        # Nginx Container
+        - name: {{ .Chart.Name }}-nginx
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.nginx.image.repository }}:{{ .Values.nginx.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.nginx.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.nginx.service.port }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+              scheme: HTTP
+            {{- toYaml .Values.livenessProbe | nindent 12 }}
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+              scheme: HTTP
+            {{- toYaml .Values.readinessProbe | nindent 12 }}
+          resources:
+            {{- toYaml .Values.nginx.resources | nindent 12 }}
+          volumeMounts:
+            - mountPath: /etc/nginx/conf.d
+              name: v2board-nginx-conf
+            - name: config-data
+              mountPath: /data/v2board/config
+              subPath: config
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                  - sh
+                  - '-c'
+                  - sleep 15 && /usr/sbin/nginx -s quit
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        # PHP Container Pool
+        - name: {{ .Chart.Name }}-php
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.php.image.repository }}:{{ .Values.php.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.php.image.pullPolicy }}
+          ports:
+            - name: tcp-php
+              containerPort: {{ .Values.php.service.port }}
+              protocol: TCP
+          env:
+            - name: APP_DEBUG
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "v2board.fullname" . }}-env
+                  key: APP_DEBUG
+            - name: APP_KEY
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "v2board.fullname" . }}-env
+                  key: APP_KEY
+            - name: APP_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "v2board.fullname" . }}-env
+                  key: APP_NAME
+            - name: APP_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "v2board.fullname" . }}-env
+                  key: APP_URL
+            - name: DB_CONNECTION
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "v2board.fullname" . }}-env
+                  key: DB_CONNECTION
+            - name: DB_DATABASE
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "v2board.fullname" . }}-env
+                  key: DB_DATABASE
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "v2board.fullname" . }}-env
+                  key: DB_HOST
+            - name: DB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "v2board.fullname" . }}-env
+                  key: DB_PORT
+            - name: REDIS_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "v2board.fullname" . }}-env
+                  key: REDIS_HOST
+            - name: REDIS_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "v2board.fullname" . }}-env
+                  key: REDIS_PORT
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "v2board.fullname" . }}-mariadb
+                  key: mariadb-password
+            - name: DB_USERNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "v2board.fullname" . }}-env
+                  key: DB_USERNAME
+          resources:
+            {{- toYaml .Values.php.resources | nindent 12 }}
+          volumeMounts:
+            - name: config-data
+              mountPath: /data/v2board/config
+              subPath: config
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      schedulerName: default-scheduler
+  strategy:
+    {{- toYaml .Values.strategy | nindent 4 }}
+  revisionHistoryLimit: 10
+  progressDeadlineSeconds: 600

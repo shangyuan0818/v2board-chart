@@ -1,0 +1,101 @@
+kind: Job
+apiVersion: batch/v1
+metadata:
+  name: {{ include "v2board.name" . }}-init
+  labels:
+    app: {{ include "v2board.name" . }}-init
+    {{- include "v2board.labels" . | nindent 4 }}
+spec:
+  parallelism: 1
+  completions: 1
+  activeDeadlineSeconds: 60
+  backoffLimit: 3
+  template:
+    metadata:
+      name: {{ include "v2board.name" . }}-init
+      labels:
+        {{- include "v2board.labels" . | nindent 8 }}
+    spec:
+      volumes:
+        - name: config-data
+          persistentVolumeClaim:
+            claimName: v2board-nfs
+      containers:
+        - name: {{ include "v2board.name" . }}-init
+          image: {{ .Values.php.image.repository }}:{{ .Values.php.image.tag }}
+          imagePullPolicy: IfNotPresent
+          command:
+            - sh
+          args:
+            - /entrypoint_cron.sh
+          env:
+            - name: APP_DEBUG
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "v2board.fullname" . }}-env
+                  key: APP_DEBUG
+            - name: APP_KEY
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "v2board.fullname" . }}-env
+                  key: APP_KEY
+            - name: APP_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "v2board.fullname" . }}-env
+                  key: APP_NAME
+            - name: APP_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "v2board.fullname" . }}-env
+                  key: APP_URL
+            - name: DB_CONNECTION
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "v2board.fullname" . }}-env
+                  key: DB_CONNECTION
+            - name: DB_DATABASE
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "v2board.fullname" . }}-env
+                  key: DB_DATABASE
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "v2board.fullname" . }}-env
+                  key: DB_HOST
+            - name: DB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "v2board.fullname" . }}-env
+                  key: DB_PORT
+            - name: REDIS_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "v2board.fullname" . }}-env
+                  key: REDIS_HOST
+            - name: REDIS_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "v2board.fullname" . }}-env
+                  key: REDIS_PORT
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "v2board.fullname" . }}-mariadb
+                  key: mariadb-password
+          resources: {}
+          volumeMounts:
+            - name: {{ include "v2board.fullname" . }}-config
+              mountPath: /data/v2board/config
+              subPath: config
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+      restartPolicy: OnFailure
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      schedulerName: default-scheduler
+  completionMode: NonIndexed
+  suspend: false

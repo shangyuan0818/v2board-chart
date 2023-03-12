@@ -1,0 +1,126 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "v2board.fullname" . }}-queue
+  labels:
+    {{- include "v2board.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "v2board.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "v2board.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      volumes:
+        - name: config-data # 配置文件
+          persistentVolumeClaim:
+            claimName: {{ include "v2board.fullname" . }}-nfs
+      containers:
+        # PHP Container Pool
+        - name: {{ .Chart.Name }}-queue
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.queue.image.repository }}:{{ .Values.queue.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.queue.image.pullPolicy }}
+          command:
+            - /bin/sh
+          args:
+            - /entrypoint_queue.sh
+          ports:
+            - name: tcp-php
+              containerPort: {{ .Values.queue.service.port }}
+              protocol: TCP
+          env:
+            - name: APP_DEBUG
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "v2board.fullname" . }}-env
+                  key: APP_DEBUG
+            - name: APP_KEY
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "v2board.fullname" . }}-env
+                  key: APP_KEY
+            - name: APP_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "v2board.fullname" . }}-env
+                  key: APP_NAME
+            - name: APP_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "v2board.fullname" . }}-env
+                  key: APP_URL
+            - name: DB_CONNECTION
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "v2board.fullname" . }}-env
+                  key: DB_CONNECTION
+            - name: DB_DATABASE
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "v2board.fullname" . }}-env
+                  key: DB_DATABASE
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "v2board.fullname" . }}-env
+                  key: DB_HOST
+            - name: DB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "v2board.fullname" . }}-env
+                  key: DB_PORT
+            - name: REDIS_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "v2board.fullname" . }}-env
+                  key: REDIS_HOST
+            - name: REDIS_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "v2board.fullname" . }}-env
+                  key: REDIS_PORT
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "v2board.fullname" . }}-mariadb
+                  key: mariadb-password
+            - name: DB_USERNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "v2board.fullname" . }}-env
+                  key: DB_USERNAME
+          resources:
+            {{- toYaml .Values.queue.resources | nindent 12 }}
+          volumeMounts:
+            - name: config-data
+              mountPath: /data/v2board/config
+              subPath: config
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
