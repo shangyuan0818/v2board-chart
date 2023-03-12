@@ -50,13 +50,10 @@ app.kubernetes.io/name: {{ include "v2board.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
-{{/*
-Create the name of the service account to use
-*/}}
-{{- define "v2board.serviceAccountName" -}}
-{{- if .Values.serviceAccount.create }}
-{{- default (include "v2board.fullname" .) .Values.serviceAccount.name }}
-{{- else }}
-{{- default "default" .Values.serviceAccount.name }}
+{{- define "redis.fullname" -}}
+{{- printf "%s-redis" (include "v2board.fullname" .) | trunc 63 | trimSuffix "-" }}
 {{- end }}
+
+{{- define "redis.name" -}}
+{{- printf "%s-redis" (include "v2board.name" .) | trunc 63 | trimSuffix "-" }}
 {{- end }}

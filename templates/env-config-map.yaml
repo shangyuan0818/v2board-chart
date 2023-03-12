@@ -1,0 +1,36 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ include "v2board.fullname" . }}-env
+data:
+  APP_DEBUG: 'true'
+  APP_KEY: 'base64:{{ randAlphaNum 32 | b64enc }}'
+  APP_NAME: 'v2board'
+  APP_URL: 'http://localhost'
+  DB_CONNECTION: 'mysql'
+  {{ if .Values.mariadb.enabled }}
+  DB_DATABASE: '{{ .Values.mariadb.auth.database }}'
+  DB_HOST: '{{ include "v2board.fullname" . }}-mariadb.{{ .Release.Namespace }}'
+  DB_PORT: '3306'
+  DB_USERNAME: '{{ .Values.mariadb.auth.username }}'
+  DB_PASSWORD: '{{ or .Values.mariadb.auth.password (randAlphaNum 32) }}'
+  {{ else }}
+  DB_DATABASE: '{{ .Values.externalDatabase.database }}'
+  DB_HOST: '{{ .Values.externalDatabase.host }}'
+  DB_PORT: '{{ .Values.externalDatabase.port | quote }}'
+  DB_USERNAME: '{{ .Values.externalDatabase.user }}'
+  DB_PASSWORD: '{{ .Values.externalDatabase.password }}'
+  {{ end }}
+  {{ if .Values.redis.enabled }}
+  REDIS_HOST: '{{ include "v2board.fullname" . }}-redis.{{ .Release.Namespace }}'
+  REDIS_PORT: '6379'
+  {{ if .Values.redis.auth.enabled }}
+  REDIS_PASSWORD: '{{ .Values.redis.auth.password }}'
+  {{ end }}
+  {{ else }}
+  REDIS_HOST: '{{ .Values.externalRedis.host }}'
+  REDIS_PORT: '{{ .Values.externalRedis.port | quote }}'
+  {{ if .Values.redis.auth.enabled }}
+  REDIS_PASSWORD: '{{ .Values.externalRedis.password }}'
+  {{ end }}
+  {{ end }}

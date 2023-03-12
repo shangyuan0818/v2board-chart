@@ -11,7 +11,6 @@ spec:
   suspend: false
   jobTemplate:
     metadata:
-      creationTimestamp: null
       labels:
         app: {{ include "v2board.fullname" . }}-schedule
     spec:

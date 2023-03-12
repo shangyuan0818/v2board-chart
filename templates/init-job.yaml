@@ -1,33 +1,37 @@
 kind: Job
 apiVersion: batch/v1
 metadata:
-  name: {{ include "v2board.name" . }}-init
+  name: {{ include "v2board.fullname" . }}-install
   labels:
-    app: {{ include "v2board.name" . }}-init
-    {{- include "v2board.labels" . | nindent 4 }}
+    app: {{ include "v2board.fullname" . }}-install
+  annotations:
+    batch.kubernetes.io/job-tracking: ''
 spec:
   parallelism: 1
   completions: 1
-  activeDeadlineSeconds: 60
-  backoffLimit: 3
+  activeDeadlineSeconds: 600
+  backoffLimit: 1
+  selector:
+    matchLabels:
+      job-name: {{ include "v2board.fullname" . }}-install
   template:
     metadata:
-      name: {{ include "v2board.name" . }}-init
+      name: {{ include "v2board.fullname" . }}-install
       labels:
-        {{- include "v2board.labels" . | nindent 8 }}
+        job-name: {{ include "v2board.fullname" . }}-install
     spec:
       volumes:
         - name: config-data
           persistentVolumeClaim:
-            claimName: v2board-nfs
+            claimName: {{ include "v2board.fullname" . }}-nfs
       containers:
-        - name: {{ include "v2board.name" . }}-init
-          image: {{ .Values.php.image.repository }}:{{ .Values.php.image.tag }}
-          imagePullPolicy: IfNotPresent
+        - name: {{ include "v2board.fullname" . }}-installer
+          image:  {{ .Values.php.image.repository }}:{{ .Values.php.image.tag }}
           command:
             - sh
           args:
-            - /entrypoint_cron.sh
+            - /entrypoint_artisan_job.sh
+            - 'v2board:install'
           env:
             - name: APP_DEBUG
               valueFrom:
@@ -82,20 +86,30 @@ spec:
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "v2board.fullname" . }}-mariadb
+                  name: mariadb
                   key: mariadb-password
+            - name: DB_USERNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "v2board.fullname" . }}-env
+                  key: DB_USERNAME
+            - name: DEFAULT_ADMIN_EMAIL
+              valueFrom:
+                configMapKeyRef:
+                  name: v2board-install-config
+                  key: DEFAULT_ADMIN_EMAIL
           resources: {}
           volumeMounts:
-            - name: {{ include "v2board.fullname" . }}-config
+            - name: config-data
               mountPath: /data/v2board/config
-              subPath: config
+              subPath: v2board/config
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
+          imagePullPolicy: Always
       restartPolicy: OnFailure
-      terminationGracePeriodSeconds: 30
+      terminationGracePeriodSeconds: 60
       dnsPolicy: ClusterFirst
-      securityContext:
-        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      securityContext: {}
       schedulerName: default-scheduler
   completionMode: NonIndexed
   suspend: false
