@@ -3,6 +3,7 @@ kind: Deployment
 metadata:
   name: {{ include "v2board.fullname" . }}-v2board
   labels:
+    app: {{ include "v2board.name" . }}-v2board
     {{- include "v2board.labels" . | nindent 4 }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
@@ -18,6 +19,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
+        app: {{ include "v2board.name" . }}-v2board
         {{- include "v2board.selectorLabels" . | nindent 8 }}
     spec:
       {{- with .Values.imagePullSecrets }}

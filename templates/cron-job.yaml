@@ -26,15 +26,11 @@ spec:
             {{- include "v2board.labels" . | nindent 12 }}
         spec:
           volumes:
-            - name: host-time
-              hostPath:
-                path: /etc/localtime
-                type: ''
-            - name: volume-qvfp1p
+            - name: config-data
               persistentVolumeClaim:
                 claimName: v2board-nfs
           containers:
-            - name: container-dkq1ry
+            - name: {{ include "v2board.fullname" . }}-schedule-cron
               image: {{ .Values.php.image.repository }}:{{ .Values.php.image.tag }}
               imagePullPolicy: IfNotPresent
               command:

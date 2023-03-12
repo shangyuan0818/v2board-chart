@@ -22,7 +22,7 @@ data:
   DB_PASSWORD: '{{ .Values.externalDatabase.password }}'
   {{ end }}
   {{ if .Values.redis.enabled }}
-  REDIS_HOST: '{{ include "v2board.fullname" . }}-redis.{{ .Release.Namespace }}'
+  REDIS_HOST: '{{ include "v2board.fullname" . }}-redis-headless.{{ .Release.Namespace }}'
   REDIS_PORT: '6379'
   {{ if .Values.redis.auth.enabled }}
   REDIS_PASSWORD: '{{ .Values.redis.auth.password }}'

@@ -3,6 +3,7 @@ kind: Deployment
 metadata:
   name: {{ include "v2board.fullname" . }}-queue
   labels:
+    app: {{ include "v2board.name" . }}-queue
     {{- include "v2board.labels" . | nindent 4 }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
@@ -10,6 +11,7 @@ spec:
   {{- end }}
   selector:
     matchLabels:
+      app: {{ include "v2board.name" . }}-queue
       {{- include "v2board.selectorLabels" . | nindent 6 }}
   template:
     metadata:
