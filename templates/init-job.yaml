@@ -3,8 +3,7 @@ apiVersion: batch/v1
 metadata:
   name: {{ include "v2board.fullname" . }}-install
   labels:
-    app: {{ include "v2board.fullname" . }}-v2board
-    job-name: {{ include "v2board.fullname" . }}-install
+    app: {{ include "v2board.fullname" . }}-v2board-install
   annotations:
     batch.kubernetes.io/job-tracking: ''
 spec:
@@ -14,14 +13,12 @@ spec:
   backoffLimit: 1
   selector:
     matchLabels:
-      app: {{ include "v2board.fullname" . }}-v2board
-      job-name: {{ include "v2board.fullname" . }}-install
+      app: {{ include "v2board.fullname" . }}-v2board-install
   template:
     metadata:
       name: {{ include "v2board.fullname" . }}-install
       labels:
-        app: {{ include "v2board.fullname" . }}-v2board
-        job-name: {{ include "v2board.fullname" . }}-install
+        app: {{ include "v2board.fullname" . }}-v2board-install
     spec:
       volumes:
         - name: config-data
