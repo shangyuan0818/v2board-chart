@@ -5,6 +5,8 @@ metadata:
   labels:
     {{- include "v2board.labels" . | nindent 4 }}
     app: {{ include "v2board.name" . }}-v2board-web
+  annotations:
+    configmap.reloader.stakater.com/reload: '{{ include "v2board.name" . }}-nginx-conf,{{ include "v2board.name" . }}-php-env'
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
