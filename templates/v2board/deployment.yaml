@@ -1,10 +1,10 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "v2board.fullname" . }}-v2board
+  name: {{ include "v2board.fullname" . }}-v2board-web
   labels:
-    app: {{ include "v2board.name" . }}-v2board
     {{- include "v2board.labels" . | nindent 4 }}
+    app: {{ include "v2board.name" . }}-v2board-web
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
@@ -12,6 +12,7 @@ spec:
   selector:
     matchLabels:
       {{- include "v2board.selectorLabels" . | nindent 6 }}
+      app: {{ include "v2board.name" . }}-v2board-web
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -19,8 +20,8 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        app: {{ include "v2board.name" . }}-v2board
         {{- include "v2board.selectorLabels" . | nindent 8 }}
+        app: {{ include "v2board.name" . }}-v2board-web
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -29,7 +30,7 @@ spec:
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       volumes:
-        - name: v2board-nginx-conf # nginx配置文件
+        - name: nginx-conf # nginx配置文件
           configMap:
             name: {{ include "v2board.fullname" . }}-nginx-conf
             defaultMode: 420 # 0644
@@ -63,7 +64,7 @@ spec:
             {{- toYaml .Values.nginx.resources | nindent 12 }}
           volumeMounts:
             - mountPath: /etc/nginx/conf.d
-              name: v2board-nginx-conf
+              name: nginx-conf
             - name: config-data
               mountPath: /data/v2board/config
               subPath: config
@@ -137,6 +138,11 @@ spec:
                 configMapKeyRef:
                   name: {{ include "v2board.fullname" . }}-env
                   key: REDIS_PORT
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "v2board.fullname" . }}-redis
+                  key: redis-password
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:

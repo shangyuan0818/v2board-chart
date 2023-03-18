@@ -33,7 +33,7 @@ data:
         # pass the PHP scripts to FastCGI server listening on 127.0.0.1:9000
         #
         location ~ [^/]\.php(/|$) {
-            fastcgi_pass {{ include "v2board.fullname" . }}-php.{{ .Release.Namespace }}.svc.{{ .Values.clusterDomain }}:9000;
+            fastcgi_pass 127.0.0.1:9000;
             include fastcgi-php.conf;
             include fastcgi_params;
         }
