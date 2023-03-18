@@ -2,7 +2,7 @@
 kind: PersistentVolume
 apiVersion: v1
 metadata:
-  name: {{ include "v2board.fullname" . }}-nfs-{{ randAlphaNum 16 | lower }}
+  name: {{ .Release.Namespace }}-{{ include "v2board.fullname" . }}-nfs
   labels:
     app: {{ include "v2board.name" . }}-nfs-server
 spec:

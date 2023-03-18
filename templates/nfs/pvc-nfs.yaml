@@ -11,7 +11,7 @@ spec:
   resources:
     requests:
       storage: {{ .Values.nfs.persistence.size }}
-  volumeName: {{ include "v2board.fullname" . }}-nfs
+  volumeName: {{ .Release.Namespace }}-{{ include "v2board.fullname" . }}-nfs
   storageClassName: ''
   volumeMode: Filesystem
 {{ end }}
