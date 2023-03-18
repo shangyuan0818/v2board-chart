@@ -2,7 +2,7 @@
 kind: PersistentVolume
 apiVersion: v1
 metadata:
-  name: {{ include "v2board.fullname" . }}-nfs
+  name: {{ include "v2board.fullname" . }}-nfs-{{ randAlphaNum 16 | lower }}
   labels:
     app: {{ include "v2board.name" . }}-nfs-server
 spec:
@@ -18,6 +18,6 @@ spec:
     namespace: {{ .Release.Namespace }}
     name: {{ include "v2board.fullname" . }}-nfs
     apiVersion: v1
-  persistentVolumeReclaimPolicy: Delete
+  persistentVolumeReclaimPolicy: Retain
   volumeMode: Filesystem
 {{ end }}

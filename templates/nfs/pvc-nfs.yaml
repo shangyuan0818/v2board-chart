@@ -14,5 +14,4 @@ spec:
   volumeName: {{ include "v2board.fullname" . }}-nfs
   storageClassName: ''
   volumeMode: Filesystem
-
 {{ end }}
