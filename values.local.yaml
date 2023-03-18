@@ -38,7 +38,7 @@ nginx:
     repository: asia-east2-docker.pkg.dev/ahdark-services/star-horizon/v2board-nginx
     pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "latest"
+    tag: ""
 
   service:
     type: ClusterIP
@@ -96,7 +96,7 @@ nfs:
     repository: gcr.io/google_containers/volume-nfs
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: ""
+    tag: "latest"
   persistence:
     enabled: true
     accessMode: ReadWriteOnce

@@ -26,7 +26,7 @@ spec:
             claimName: {{ include "v2board.fullname" . }}-nfs
       containers:
         - name: {{ include "v2board.fullname" . }}-installer
-          image:  {{ .Values.php.image.repository }}:{{ .Values.php.image.tag }}
+          image:  {{ .Values.php.image.repository }}:{{ .Values.php.image.tag | default .Chart.AppVersion }}
           command:
             - sh
           args:
