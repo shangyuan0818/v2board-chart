@@ -34,6 +34,7 @@ jobs:
 
       - name: Package
         run: |
+          helm dependency update
           helm package .
         
       - name: Upload
