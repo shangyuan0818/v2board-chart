@@ -41,6 +41,6 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: helm-package
-          path: v2board-helm-*.tgz
+          path: v2board-*.tgz
           if-no-files-found: error
           retention-days: 7
