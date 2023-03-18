@@ -3,8 +3,7 @@ apiVersion: batch/v1
 metadata:
   name: {{ include "v2board.fullname" . }}-schedule
   labels:
-    app: {{ include "v2board.fullname" . }}-v2board
-    job-name: {{ include "v2board.fullname" . }}-schedule
+    app: {{ include "v2board.fullname" . }}-schedule
     {{- include "v2board.labels" . | nindent 4 }}
 spec:
   schedule: '* * * * *'
@@ -13,8 +12,7 @@ spec:
   jobTemplate:
     metadata:
       labels:
-        app: {{ include "v2board.fullname" . }}-v2board
-        job-name: {{ include "v2board.fullname" . }}-schedule
+        app: {{ include "v2board.fullname" . }}-schedule
     spec:
       parallelism: 1
       completions: 1
@@ -24,14 +22,13 @@ spec:
         metadata:
           name: {{ include "v2board.fullname" . }}-schedule
           labels:
-            app: v2board-schedule
-            job-name: {{ include "v2board.fullname" . }}-schedule
+            app: {{ include "v2board.fullname" . }}-schedule
             {{- include "v2board.labels" . | nindent 12 }}
         spec:
           volumes:
             - name: config-data
               persistentVolumeClaim:
-                claimName: v2board-nfs
+                claimName: {{ include "v2board.fullname" . }}-nfs
           containers:
             - name: {{ include "v2board.fullname" . }}-schedule-cron
               image: {{ .Values.php.image.repository }}:{{ .Values.php.image.tag }}
@@ -91,10 +88,15 @@ spec:
                     configMapKeyRef:
                       name: {{ include "v2board.fullname" . }}-env
                       key: REDIS_PORT
+                - name: REDIS_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ include "v2board.fullname" . }}-redis
+                      key: redis-password
                 - name: DB_PASSWORD
                   valueFrom:
                     secretKeyRef:
-                      name: mariadb
+                      name: {{ include "v2board.fullname" . }}-mariadb
                       key: mariadb-password
                 - name: DB_USERNAME
                   valueFrom:

@@ -86,10 +86,15 @@ spec:
                 configMapKeyRef:
                   name: {{ include "v2board.fullname" . }}-env
                   key: REDIS_PORT
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "v2board.fullname" . }}-redis
+                  key: redis-password
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: mariadb
+                  name: {{ include "v2board.fullname" . }}-mariadb
                   key: mariadb-password
             - name: DB_USERNAME
               valueFrom:
@@ -99,7 +104,7 @@ spec:
             - name: DEFAULT_ADMIN_EMAIL
               valueFrom:
                 configMapKeyRef:
-                  name: v2board-install-config
+                  name: {{ include "v2board.fullname" . }}-install-config
                   key: DEFAULT_ADMIN_EMAIL
           resources: {}
           volumeMounts:

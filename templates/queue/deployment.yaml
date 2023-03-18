@@ -3,16 +3,18 @@ kind: Deployment
 metadata:
   name: {{ include "v2board.fullname" . }}-queue
   labels:
-    app: {{ include "v2board.name" . }}-queue
     {{- include "v2board.labels" . | nindent 4 }}
+    app: {{ include "v2board.name" . }}-queue
+  annotations:
+    configmap.reloader.stakater.com/reload: {{ include "v2board.name" . }}-php-env
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
-      app: {{ include "v2board.name" . }}-queue
       {{- include "v2board.selectorLabels" . | nindent 6 }}
+      app: {{ include "v2board.name" . }}-queue
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -21,6 +23,7 @@ spec:
       {{- end }}
       labels:
         {{- include "v2board.selectorLabels" . | nindent 8 }}
+        app: {{ include "v2board.name" . }}-queue
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -98,6 +101,11 @@ spec:
                 configMapKeyRef:
                   name: {{ include "v2board.fullname" . }}-env
                   key: REDIS_PORT
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "v2board.fullname" . }}-redis
+                  key: redis-password
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
