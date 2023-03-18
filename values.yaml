@@ -35,10 +35,10 @@ strategy:
 
 nginx:
   image:
-    repository: asia-east2-docker.pkg.dev/ahdark-services/star-horizon/v2board
+    repository: asia-east2-docker.pkg.dev/ahdark-services/star-horizon/v2board-nginx
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "latest"
+    tag: ""
 
   service:
     type: ClusterIP
@@ -63,7 +63,7 @@ php:
     repository: asia-east2-docker.pkg.dev/ahdark-services/star-horizon/v2board-php
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "latest"
+    tag: ""
 
   podAnnotations: { }
 
