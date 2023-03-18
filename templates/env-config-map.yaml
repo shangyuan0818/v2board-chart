@@ -2,6 +2,8 @@ kind: ConfigMap
 apiVersion: v1
 metadata:
   name: {{ include "v2board.fullname" . }}-env
+  labels:
+    app: {{ include "v2board.name" . }}-v2board
 data:
   APP_DEBUG: 'true'
   APP_KEY: 'base64:{{ randAlphaNum 32 | b64enc }}'

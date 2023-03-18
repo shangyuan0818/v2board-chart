@@ -3,6 +3,8 @@ kind: Service
 apiVersion: v1
 metadata:
   name: {{ include "v2board.fullname" . }}-nfs-server
+  labels:
+    app: {{ include "v2board.fullname" . }}-nfs-server
 spec:
   ports:
     - name: nfs

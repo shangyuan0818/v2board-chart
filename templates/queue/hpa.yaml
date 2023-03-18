@@ -4,6 +4,7 @@ kind: HorizontalPodAutoscaler
 metadata:
   name: {{ include "v2board.fullname" . }}-queue
   labels:
+    app: {{ include "v2board.name" . }}-queue
     {{- include "v2board.labels" . | nindent 4 }}
 spec:
   scaleTargetRef:

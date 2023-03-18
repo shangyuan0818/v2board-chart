@@ -3,7 +3,8 @@ apiVersion: batch/v1
 metadata:
   name: {{ include "v2board.fullname" . }}-schedule
   labels:
-    app: {{ include "v2board.fullname" . }}-schedule
+    app: {{ include "v2board.fullname" . }}-v2board
+    job-name: {{ include "v2board.fullname" . }}-schedule
     {{- include "v2board.labels" . | nindent 4 }}
 spec:
   schedule: '* * * * *'
@@ -12,7 +13,8 @@ spec:
   jobTemplate:
     metadata:
       labels:
-        app: {{ include "v2board.fullname" . }}-schedule
+        app: {{ include "v2board.fullname" . }}-v2board
+        job-name: {{ include "v2board.fullname" . }}-schedule
     spec:
       parallelism: 1
       completions: 1
@@ -23,6 +25,7 @@ spec:
           name: {{ include "v2board.fullname" . }}-schedule
           labels:
             app: v2board-schedule
+            job-name: {{ include "v2board.fullname" . }}-schedule
             {{- include "v2board.labels" . | nindent 12 }}
         spec:
           volumes:

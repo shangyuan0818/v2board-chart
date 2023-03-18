@@ -4,6 +4,7 @@ kind: HorizontalPodAutoscaler
 metadata:
   name: {{ include "v2board.fullname" . }}
   labels:
+    app: {{ include "v2board.fullname" . }}-v2board
     {{- include "v2board.labels" . | nindent 4 }}
 spec:
   scaleTargetRef:

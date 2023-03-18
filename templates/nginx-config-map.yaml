@@ -2,6 +2,8 @@ kind: ConfigMap
 apiVersion: v1
 metadata:
   name: {{ include "v2board.fullname" . }}-nginx-conf
+  labels:
+    app: {{ include "v2board.fullname" . }}-v2board
 data:
   default.conf: |-
     server {

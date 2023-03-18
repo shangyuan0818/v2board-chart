@@ -17,6 +17,7 @@ kind: Ingress
 metadata:
   name: {{ $fullName }}
   labels:
+    app: {{ include "v2board.fullname" . }}-v2board
     {{- include "v2board.labels" . | nindent 4 }}
   {{- with .Values.ingress.annotations }}
   annotations:

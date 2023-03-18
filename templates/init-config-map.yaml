@@ -2,5 +2,7 @@ kind: ConfigMap
 apiVersion: v1
 metadata:
   name: {{ template "v2board.fullname" . }}-install-config
+  labels:
+    app: {{ include "v2board.name" . }}-v2board
 data:
   DEFAULT_ADMIN_EMAIL: admin@star-horizon.net
