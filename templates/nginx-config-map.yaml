@@ -3,7 +3,7 @@ apiVersion: v1
 metadata:
   name: {{ include "v2board.fullname" . }}-nginx-conf
   labels:
-    app: {{ include "v2board.fullname" . }}-v2board
+    app: {{ include "v2board.name" . }}-v2board-web
 data:
   default.conf: |-
     server {

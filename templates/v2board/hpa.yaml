@@ -4,13 +4,13 @@ kind: HorizontalPodAutoscaler
 metadata:
   name: {{ include "v2board.fullname" . }}
   labels:
-    app: {{ include "v2board.fullname" . }}-v2board
+    app: {{ include "v2board.name" . }}-v2board-web
     {{- include "v2board.labels" . | nindent 4 }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: {{ include "v2board.fullname" . }}-v2board
+    app: {{ include "v2board.name" . }}-v2board-web
   minReplicas: {{ .Values.autoscaling.minReplicas }}
   maxReplicas: {{ .Values.autoscaling.maxReplicas }}
   metrics:

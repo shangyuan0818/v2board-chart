@@ -5,6 +5,8 @@ metadata:
   name: {{ include "v2board.fullname" . }}-nfs-pvc
   annotations:
     volume.beta.kubernetes.io/storage-class: {{ .Values.nfs.persistence.storageClass }}
+  labels:
+    app: {{ include "v2board.name" . }}-nfs-server
 spec:
   accessModes:
     - {{ .Values.nfs.persistence.accessMode }}
