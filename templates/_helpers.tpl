@@ -51,21 +51,49 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{- define "v2board.nfs.pv.fullname" -}}
-{{- printf "%s-nfs-pv" (include "v2board.fullname" .) | trunc 63 | trimSuffix "-" }}
-{{- end }}
-
-{{- define "v2board.nfs.pv.name" -}}
-{{- printf "%s-nfs-pv" (include "v2board.name" .) | trunc 63 | trimSuffix "-" }}
+{{- printf "%s-%s-nfs-pv" .Release.Namespace (include "v2board.fullname" .) | trunc 63 | trimSuffix "-" -}}
 {{- end }}
 
 {{- define "v2board.nfs.pvc.fullname" -}}
-{{- printf "%s-nfs-pvc-%s" (include "v2board.fullname" .) (randAlphaNum 32) | trunc 63 | trimSuffix "-" }}
+{{- printf "%s-%s-nfs-pvc" .Release.Namespace (include "v2board.fullname" .) | trunc 63 | trimSuffix "-" -}}
 {{- end }}
+
+{{- define "v2board.mariadb.secret" -}}
+    {{- if .Values.mariadb.enabled -}}
+        {{- if .Values.mariadb.auth.existingSecret -}}
+            {{- printf "%s" .Values.mariadb.auth.existingSecret -}}
+        {{- else -}}
+            {{- printf "%s-mariadb" (include "v2board.fullname" .) -}}
+        {{- end -}}
+    {{- else -}}
+        {{- if .Values.externalDatabase.existingSecret -}}
+            {{- printf "%s" .Values.externalDatabase.existingSecret -}}
+        {{- else -}}
+            {{- printf "%s-externaldb" (include "common.names.fullname" .) -}}
+        {{- end -}}
+    {{- end -}}
+{{- end -}}
+
+{{- define "v2board.redis.secret" -}}
+    {{- if .Values.redis.enabled -}}
+        {{- if .Values.redis.auth.existingSecret -}}
+            {{- printf "%s" .Values.redis.auth.existingSecret -}}
+        {{- else -}}
+            {{- printf "%s-redis" (include "v2board.fullname" .) -}}
+        {{- end -}}
+    {{- else -}}
+        {{- if .Values.externalRedis.existingSecret -}}
+            {{- printf "%s" .Values.externalRedis.existingSecret -}}
+        {{- else -}}
+            {{- printf "%s-externalredis" (include "common.names.fullname" .) -}}
+        {{- end -}}
+    {{- end -}}
+{{- end -}}
 
 {{- define "redis.fullname" -}}
 {{- printf "%s-redis" (include "v2board.fullname" .) | trunc 63 | trimSuffix "-" }}
-{{- end }}
+{{- end -}}
 
 {{- define "redis.name" -}}
 {{- printf "%s-redis" (include "v2board.name" .) | trunc 63 | trimSuffix "-" }}
-{{- end }}
+{{- end -}}

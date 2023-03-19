@@ -91,12 +91,12 @@ spec:
                 - name: REDIS_PASSWORD
                   valueFrom:
                     secretKeyRef:
-                      name: {{ include "v2board.fullname" . }}-redis
+                      name: {{ include "v2board.redis.secret" . }}
                       key: redis-password
                 - name: DB_PASSWORD
                   valueFrom:
                     secretKeyRef:
-                      name: {{ include "v2board.fullname" . }}-mariadb
+                      name: {{ include "v2board.mariadb.secret" . }}
                       key: mariadb-password
                 - name: DB_USERNAME
                   valueFrom:
