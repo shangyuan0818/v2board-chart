@@ -50,6 +50,18 @@ app.kubernetes.io/name: {{ include "v2board.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
+{{- define "v2board.nfs.pv.fullname" -}}
+{{- printf "%s-nfs-pv" (include "v2board.fullname" .) | trunc 63 | trimSuffix "-" }}
+{{- end }}
+
+{{- define "v2board.nfs.pv.name" -}}
+{{- printf "%s-nfs-pv" (include "v2board.name" .) | trunc 63 | trimSuffix "-" }}
+{{- end }}
+
+{{- define "v2board.nfs.pvc.fullname" -}}
+{{- printf "%s-nfs-pvc-%s" (include "v2board.fullname" .) (randAlphaNum 32) | trunc 63 | trimSuffix "-" }}
+{{- end }}
+
 {{- define "redis.fullname" -}}
 {{- printf "%s-redis" (include "v2board.fullname" .) | trunc 63 | trimSuffix "-" }}
 {{- end }}
